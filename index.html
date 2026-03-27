@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Anime Watchlist 🌸</title>
+  
+  <!-- Google Fonts: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    /* Dark Theme & Pro Styling */
+    body { 
+      background-color: #0f1115; 
+      font-family: 'Poppins', sans-serif;
+      color: #e4e6eb;
+    }
+    
+    h1 { font-weight: 600; letter-spacing: 1px; }
+    
+    .text-accent { color: #ff4757 !important; }
+    
+    /* Button Styling */
+    .btn-accent { 
+      background-color: #ff4757; 
+      border-color: #ff4757; 
+      color: white; 
+      font-weight: 600; 
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    .btn-accent:hover { 
+      background-color: #ff6b81; 
+      border-color: #ff6b81; 
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+    }
+
+    /* Form Card Styling */
+    .form-card {
+      background-color: #1e222d;
+      border: 1px solid #2a2f3d;
+      border-radius: 15px;
+    }
+    .form-control {
+      background-color: #2a2f3d;
+      border: 1px solid #3a4155;
+      color: #fff;
+      border-radius: 10px;
+    }
+    .form-control:focus {
+      background-color: #2a2f3d;
+      border-color: #ff4757;
+      color: #fff;
+      box-shadow: 0 0 0 0.25rem rgba(255, 71, 87, 0.25);
+    }
+    .form-floating label { color: #a0a5b1; }
+
+    /* Anime Cards Styling */
+    .anime-card { 
+      background-color: #1e222d;
+      border: none;
+      border-radius: 15px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .anime-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6);
+    }
+    .card-img-top { 
+      height: 350px; 
+      object-fit: cover; 
+      border-bottom: 2px solid #ff4757;
+    }
+    .season-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 71, 87, 0.95);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    
+    .loader { display: none; }
+
+    /* Mobile Adjustments */
+    @media (max-width: 768px) {
+      .card-img-top { height: 260px; }
+      h1 { font-size: 1.8rem; }
+      .container { padding-top: 2rem !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-5">
+  <h1 class="text-center mb-5 text-accent">✨ My Anime Watchlist</h1>
+
+  <!-- Add Anime Form -->
+  <div class="card shadow-lg mb-5 mx-auto form-card" style="max-width: 600px;">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-4 fw-bold text-center">Add New Anime ➕</h5>
+      <form id="animeForm">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="animeName" required placeholder="Anime Name">
+          <label for="animeName">Anime Name (e.g., Attack on Titan)</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="url" class="form-control" id="animeImg" required placeholder="Image URL">
+          <label for="animeImg">Image URL (Link)</label>
+        </div>
+        <div class="form-floating mb-4">
+          <input type="text" class="form-control" id="animeSeason" required placeholder="Season">
+          <label for="animeSeason">Season Watched (e.g., S1)</label>
+        </div>
+        <button type="submit" class="btn btn-accent w-100 py-2 fs-5" id="submitBtn">
+          Save Anime 💾
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="text-center loader mb-4" id="loadingSpinner">
+    <div class="spinner-border text-accent" role="status"></div>
+    <p class="mt-2 text-secondary">Fetching your anime... ⏳</p>
+  </div>
+
+  <!-- Watchlist Grid -->
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="watchlistGrid">
+    <!-- Anime cards will appear here -->
+  </div>
+</div>
+
+<!-- Bootstrap JS bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // ⚠️ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ⚠️
+  const GAS_URL = "YOUR_WEB_APP_URL_HERE"; 
+
+  const form = document.getElementById('animeForm');
+  const grid = document.getElementById('watchlistGrid');
+  const spinner = document.getElementById('loadingSpinner');
+  const submitBtn = document.getElementById('submitBtn');
+
+  // Fetch watchlist on page load
+  window.onload = () => {
+    if (GAS_URL === "https://script.google.com/macros/s/AKfycby2mOlUZdeYAf-qqzWK6GgFqh6V-8ggSZNJSSHZaEmp7QdisCyLTGwKjNyNysL0x3R9/exec") {
+      grid.innerHTML = `<div class="col-12 text-center text-warning fs-5">⚠️ Please add your Google Apps Script URL in the code!</div>`;
+      return;
+    }
+    loadWatchlist();
+  };
+
+  // Function to load data from backend
+  async function loadWatchlist() {
+    spinner.style.display = 'block';
+    grid.innerHTML = '';
+    
+    try {
+      const response = await fetch(GAS_URL);
+      const data = await response.json();
+      
+      data.forEach(anime => {
+        grid.innerHTML += `
+          <div class="col">
+            <div class="card h-100 anime-card shadow-lg">
+              <div class="position-relative">
+                <img src="${anime.image}" class="card-img-top w-100" alt="${anime.name}" onerror="this.src='https://via.placeholder.com/300x400/2a2f3d/ffffff?text=No+Image'">
+                <span class="season-badge">📺 ${anime.season}</span>
+              </div>
+              <div class="card-body text-center">
+                <h5 class="card-title text-truncate fw-bold mb-0 text-white" title="${anime.name}">${anime.name}</h5>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    } catch (error) {
+      grid.innerHTML = `<div class="col-12 text-center text-danger">Error loading watchlist. Check console.</div>`;
+      console.error("Error fetching data:", error);
+    } finally {
+      spinner.style.display = 'none';
+    }
+  }
+
+  // Function to save new anime
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "Saving... <span class='spinner-border spinner-border-sm'></span>";
+
+    const newAnime = {
+      name: document.getElementById('animeName').value,
+      image: document.getElementById('animeImg').value,
+      season: document.getElementById('animeSeason').value
+    };
+
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify(newAnime)
+      });
+      
+      form.reset();
+      loadWatchlist(); // Reload grid
+    } catch (error) {
+      alert("Error saving anime! Make sure your Apps Script is deployed correctly.");
+      console.error(error);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Save Anime 💾";
+    }
+  });
+</script>
+</body>
+</html>
