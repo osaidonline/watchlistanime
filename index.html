@@ -146,7 +146,7 @@
 
 <script>
   // ⚠️ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ⚠️
-  const GAS_URL = "https://script.google.com/macros/s/AKfycby2mOlUZdeYAf-qqzWK6GgFqh6V-8ggSZNJSSHZaEmp7QdisCyLTGwKjNyNysL0x3R9/exec"; 
+  const GAS_URL = "YOUR_WEB_APP_URL_HERE"; 
 
   const form = document.getElementById('animeForm');
   const grid = document.getElementById('watchlistGrid');
@@ -155,10 +155,7 @@
 
   // Fetch watchlist on page load
   window.onload = () => {
-    if (GAS_URL === "https://script.google.com/macros/s/AKfycby2mOlUZdeYAf-qqzWK6GgFqh6V-8ggSZNJSSHZaEmp7QdisCyLTGwKjNyNysL0x3R9/exec") {
-      grid.innerHTML = `<div class="col-12 text-center text-warning fs-5">⚠️ Please add your Google Apps Script URL in the code!</div>`;
-      return;
-    }
+    // Removed the broken IF statement so it always loads!
     loadWatchlist();
   };
 
@@ -209,6 +206,9 @@
     try {
       await fetch(GAS_URL, {
         method: 'POST',
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8" // Added to fix Google Apps Script CORS issue
+        },
         body: JSON.stringify(newAnime)
       });
       
